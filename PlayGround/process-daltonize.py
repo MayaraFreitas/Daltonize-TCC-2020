@@ -6,7 +6,7 @@ import argparse
 import sys
 import colorsys
 
-typeOfColorBlindness = 3
+typeOfColorBlindness = 2
 #imgName = "frutas-2.JPG"
 imgName = "teste-daltonismo2.JPG"
 #imgName = "red.JPG"
@@ -111,6 +111,36 @@ def daltonizeImage(colorBlindnessType, lsmMatrix, sizeX, sizeY):
     resultMatrix = multiplyMatrix(baseMatrix, lsmMatrix, sizeX, sizeY)
     return resultMatrix
 
+def calculareErrorImage(imgBase, daltonizeImg, sizeX, sizeY):
+	
+	resultMatrix = np.zeros((sizeX,sizeY,3),'float')
+	for i in range(0,sizeX):
+		for j in range(0,sizeY):
+			for k in range(0,3):
+				resultMatrix[i,j,k] = imgBase[i,j,k] - daltonizeImg[i,j,k]
+				if resultMatrix[i,j,k] < 0 :
+					resultMatrix[i,j,k] = 0
+				elif resultMatrix[i,j,k] > 255:
+					resultMatrix[i,j,k] = 255
+	return resultMatrix
+
+def gerenateBestImage(imgBase, errorImg, sizeX, sizeY):
+    
+    resultMatrix = np.zeros((sizeX,sizeY,3),'float')
+    baseMatrix = numpy.array([[0.0, 0.0, 0.0],[0.7, 0.1, 0.0],[0.7 , 0.0 , 1.0]])
+    newMatrix = multiplyMatrix(baseMatrix, errorImg, sizeX, sizeY)
+    
+    for i in range(0,sizeX):
+        for j in range(0,sizeY):
+            for k in range(0,3):
+                resultMatrix[i,j,k] = imgBase[i,j,k] + newMatrix[i,j,k]
+                if resultMatrix[i,j,k] < 0:
+                    resultMatrix[i,j,k] = 0
+                elif resultMatrix[i,j,k] > 255:
+                    resultMatrix[i,j,k] = 255
+    return resultMatrix
+
+
 img = Image.open(dirImgBase)
 sizeX = img.size[1]
 sizeY = img.size[0]
@@ -134,5 +164,13 @@ if typeOfColorBlindness != 4:
     print('Terceiro, converter de volta para RGB')
     rgbPhoto = convertToRGB(daltonizeMatrix,sizeX,sizeY)
 
-    result = Image.fromarray(numpy.uint8(rgbPhoto))
+	# Quarto, calcular perda
+    print('Quarto, calular perda')
+    errorImg = calculareErrorImage(imgMatrix, rgbPhoto,sizeX,sizeY)
+ 
+	# Quinto, gerar imagem melhor
+    print('Quinto, gerar imagem melhor')
+    bestImg = gerenateBestImage(imgMatrix, errorImg, sizeX, sizeY)
+ 
+    result = Image.fromarray(numpy.uint8(bestImg))
     result.show()

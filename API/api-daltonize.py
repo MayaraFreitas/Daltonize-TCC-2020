@@ -1,11 +1,13 @@
 import os
 import urllib.request
-from app import app
+#from app import app
 from flask import Flask, request, redirect, jsonify, send_file
 from werkzeug.utils import secure_filename
 import os , io , sys
 from PIL import Image
-from daltonize import processImage
+from daltonize2 import processImage
+app = Flask(__name__)
+
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 

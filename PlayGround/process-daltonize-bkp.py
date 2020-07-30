@@ -8,13 +8,8 @@ import colorsys
 
 typeOfColorBlindness = 2
 #imgName = "frutas-2.JPG"
-#imgName = "paisagem.JPG"
-#imgName = "teste-daltonismo2.JPG"
-#imgName = "cubo-magico.JPG"
+imgName = "teste-daltonismo2.JPG"
 #imgName = "red.JPG"
-imgName = "art-plates.JPG"
-#imgName = "paleta.JPG"
-#imgName = "teste2.JPG"
 #imgName = "RGB.JPG"
 dirImgBase = "img/test/" + imgName
 dirImgResult = "img/result/" + "T" + str(typeOfColorBlindness) + "-" + imgName
@@ -91,19 +86,16 @@ def normaliseValues(imgArray,sizeX,sizeY):
 		for j in range(0,sizeY):
 			for k in range(0,3):
 				resultMatrix[i,j,k] = normaliseValue(imgArray[i,j,k], min[k], max[k])
-			#if (imgArray[i,j,k] > 255 or imgArray[i,j,k] < 0 or imgArray[i,j,k] > 255 or imgArray[i,j,k] < 0 or imgArray[i,j,k] > 255 or imgArray[i,j,k] < 0 ):
-				#print('antes RGB: ' + str(imgArray[i,j,0]) + ', ' + str(imgArray[i,j,1]) + ', ' + str(imgArray[i,j,2]))
-				#print('normalizado RGB: ' + str(resultMatrix[i,j,0]) + ', ' + str(resultMatrix[i,j,1]) + ', ' + str(resultMatrix[i,j,2]))
-				#print('======================================================')
 
 			# if(j == 250 and i == 100):
 			# 	print('normalizado RGB: ' + str(resultMatrix[i,j,0]) + ', ' + str(resultMatrix[i,j,1]) + ', ' + str(resultMatrix[i,j,2]))
+
 	return resultMatrix
 
 def normaliseValue(x, min, max):
     return (x - min) / (max - min) * 255
 
-def daltonizeImage(colorBlindnessType, lsmMatrix, sizeX, sizeY): 
+def daltonizeImage(colorBlindnessType, lsmMatrix, sizeX, sizeY):
 
     if colorBlindnessType == 1:
         print('Convertendo para Protanopes')
@@ -136,7 +128,6 @@ def gerenateBestImage(imgBase, errorImg, sizeX, sizeY):
     
     resultMatrix = np.zeros((sizeX,sizeY,3),'float')
     baseMatrix = numpy.array([[0.0, 0.0, 0.0],[0.7, 0.1, 0.0],[0.7 , 0.0 , 1.0]])
-    #baseMatrix = numpy.array([[1.0, 0.0, 0.7],[0.0, 1.0, 0.7],[0.0 , 0.0 , 0.0]])
     newMatrix = multiplyMatrix(baseMatrix, errorImg, sizeX, sizeY)
     
     for i in range(0,sizeX):
@@ -173,14 +164,13 @@ if typeOfColorBlindness != 4:
     print('Terceiro, converter de volta para RGB')
     rgbPhoto = convertToRGB(daltonizeMatrix,sizeX,sizeY)
 
-	# # Quarto, calcular perda
-    # print('Quarto, calular perda')
-    # errorImg = calculareErrorImage(imgMatrix, rgbPhoto,sizeX,sizeY)
+	# Quarto, calcular perda
+    print('Quarto, calular perda')
+    errorImg = calculareErrorImage(imgMatrix, rgbPhoto,sizeX,sizeY)
  
-	# # Quinto, gerar imagem melhor
-    # print('Quinto, gerar imagem melhor')
-    # bestImg = gerenateBestImage(imgMatrix, errorImg, sizeX, sizeY)
+	# Quinto, gerar imagem melhor
+    print('Quinto, gerar imagem melhor')
+    bestImg = gerenateBestImage(imgMatrix, errorImg, sizeX, sizeY)
  
-    result = Image.fromarray(numpy.uint8(rgbPhoto))
-    
+    result = Image.fromarray(numpy.uint8(bestImg))
     result.show()

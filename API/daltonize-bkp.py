@@ -56,15 +56,15 @@ def daltonize(image, sizeX, sizeY, colorBlindnessType):
     for i in range(0,sizeX):
         for j in range(0,sizeY):
             resultMatrix[i,j] = simulateColorBlindness(image[i,j], colorBlindnessType)
-            # if (image[i,j,0] == 255 and image[i,j,1] == 255 and image[i,j,2] == 30):
-            #     print('rgb: ', image[i,j])
-            #     print('NEW rgb: ', resultMatrix[i,j])
     
     return resultMatrix
 
 def simulateColorBlindness(rgb, colorBlindnessType):
+    #print('Convert RGB to LMS')
     lmsMatrix = convertRgbToLms(rgb)
+    #print('Apply Color Blindness')
     lmsDaltonized = applyColorBlindness(lmsMatrix, colorBlindnessType)
+    #print('Convert Lms To Rgb')
     newRgb = convertLmsToRgb(lmsDaltonized)
     return newRgb
     
@@ -115,6 +115,11 @@ def normalize(value):
         return value
 
 def processImage(img, typeOfColorBlindness):
+
+    return img
+    # if (typeOfColorBlindness <= 0 and typeOfColorBlindness > 6):
+    #     return
+    
     #img = Image.open(dirImgBase)
     sizeX = img.size[1]
     sizeY = img.size[0]
@@ -122,6 +127,13 @@ def processImage(img, typeOfColorBlindness):
 
     # Converte a imagem para uma matriz
     imgMatrix = numpy.asarray(img)
-    resultImgMatrix = daltonize(imgMatrix, sizeX, sizeY, typeOfColorBlindness)
+    print('Daltonize')
+
+    if (typeOfColorBlindness <= 3):
+        resultImgMatrix = daltonize(imgMatrix, sizeX, sizeY, typeOfColorBlindness)
+    else: 
+        resultImgMatrix = daltonize(imgMatrix, sizeX, sizeY, (typeOfColorBlindness - 3))
+
+    print('End')
     result = Image.fromarray(numpy.uint8(resultImgMatrix))
     return result

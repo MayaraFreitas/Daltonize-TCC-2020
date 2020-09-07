@@ -5,7 +5,7 @@ from flask import Flask, request, redirect, jsonify, send_file
 from werkzeug.utils import secure_filename
 import os , io , sys
 from PIL import Image
-from daltonize2 import processImage
+from daltonize import processImage
 app = Flask(__name__)
 
 
@@ -40,4 +40,5 @@ def upload_file():
 		return resp
 
 if __name__ == "__main__":
-    app.run()
+    #app.run()
+	app.run('192.168.15.73')

@@ -5,6 +5,7 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:colorblindness/service/daltonize_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 void main() {
   runApp(new MaterialApp(
@@ -20,6 +21,7 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen> {
   File _image;
+  ProgressDialog progressDialog;
 
   bool processImage = false;
   int selectedItem = 1;
@@ -27,27 +29,32 @@ class _LandingScreenState extends State<LandingScreen> {
   _openGallary(BuildContext context) async {
     // ignore: deprecated_member_use
     File picture = await ImagePicker.pickImage(source: ImageSource.gallery);
-    await _uploadImage(picture);
-    Navigator.of(context).pop(); // Fecha a caixa de dialogo
+    _processImage(picture, context);
   }
 
   _openCamera(BuildContext context) async {
     // ignore: deprecated_member_use
     File picture = await ImagePicker.pickImage(source: ImageSource.camera);
-    await _uploadImage(picture);
+    _processImage(picture, context);
+  }
+
+  _processImage(File picture, BuildContext context) async {
     Navigator.of(context).pop(); // Fecha a caixa de dialogo
+    await _uploadImage(picture);
   }
 
   _uploadImage(File picture) async {
+    progressDialog.show();
     File file =
         await DaltonizeService.uploadImage(picture, processImage, selectedItem);
     setState(() {
       _image = file;
+      progressDialog.hide();
     });
     //_saveImage();
   }
 
-  _saveImage() async {
+  _saveImage() {
     if (_image != null && _image.path != null) {
       GallerySaver.saveImage(_image.path);
     }
@@ -58,12 +65,12 @@ class _LandingScreenState extends State<LandingScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Make a choice!"),
+            title: Text("Ecolha:"),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
                   GestureDetector(
-                    child: Text("Gallary"),
+                    child: Text("Galeria"),
                     onTap: () {
                       _openGallary(context);
                     },
@@ -72,7 +79,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     padding: EdgeInsets.all(8.0),
                   ),
                   GestureDetector(
-                    child: Text("Camera"),
+                    child: Text("Câmera"),
                     onTap: () {
                       _openCamera(context);
                     },
@@ -100,6 +107,21 @@ class _LandingScreenState extends State<LandingScreen> {
         width: 300,
         height: 300,
       );
+    }
+  }
+
+  List<Widget> _decideDownloadButtonView() {
+    if (_image == null) {
+      return List<Widget>();
+    } else {
+      List<Widget> list = List<Widget>();
+      list.add(IconButton(
+        icon: Icon(Icons.file_download),
+        onPressed: () {
+          _saveImage();
+        },
+      ));
+      return list;
     }
   }
 
@@ -167,55 +189,45 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
+  void _progressDialog(context) {
+    progressDialog = new ProgressDialog(context);
+    progressDialog.style(
+        message: 'Processando ...',
+        borderRadius: 10.0,
+        backgroundColor: Colors.white,
+        progressWidget: CircularProgressIndicator(),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        progress: 0.0,
+        maxProgress: 100.0,
+        progressTextStyle: TextStyle(
+            color: Colors.black, fontSize: 13.0, fontWeight: FontWeight.w400),
+        messageTextStyle: TextStyle(
+            color: Colors.black, fontSize: 19.0, fontWeight: FontWeight.w600));
+  }
+
+  _appBar() {
+    return AppBar(
+      backgroundColor: Colors.grey[800],
+      title: Text("Nome do APP"),
+      actions: _decideDownloadButtonView(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    _progressDialog(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Nome do APP"),
-      ),
+      appBar: _appBar(),
       body: Container(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              _imageView(),
-              _options(),
-              _submitImage()
-              // _switchButton(),
-              // _dropDown()
-              // Row(
-              //   children: [_switchButton(), _dropDown()],
-              // )
-            ],
+            children: <Widget>[_imageView(), _options(), _submitImage()],
           ),
         ),
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text("Main Screen"),
-  //     ),
-  //     body: Container(
-  //       child: Center(
-  //         child: Column(
-  //           mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //           children: <Widget>[
-  //             _decideImageView(),
-  //             _dropDown(),
-  //             RaisedButton(
-  //               onPressed: () {
-  //                 _showChoiceDialog(context);
-  //               },
-  //               child: Text("Select Image"),
-  //             )
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

@@ -22,15 +22,35 @@ class DaltonizeService {
 
     var response = await request.send();
 
-    //String basePath = (await getApplicationSupportDirectory()).path;
     String basePath = (await getTemporaryDirectory()).path;
     String dateTime = new DateTime.now().toString();
-    print(dateTime);
-    //File newFile = new File("${(await getTemporaryDirectory()).path}/image-$dateTime.jpg");
-    File newFile = new File("$basePath/image-$dateTime.jpg");
-    response.stream.listen((value) {
-      newFile.writeAsBytes(value);
-    });
+    String extension = _image.path.split(".")?.last;
+    List<int> bytes = new List<int>();
+    File newFile = new File("$basePath/image-$dateTime.$extension");
+
+    var subscription = response.stream.listen((value) => {bytes.addAll(value)},
+        onError: (err) => print("error: $err"),
+        onDone: () => {newFile.writeAsBytes(bytes)});
     return newFile;
+
+    // response.stream.listen((value) => bytes.addAll(value), onDone: () {
+    //   newFile.writeAsBytes(bytes);
+    //   return newFile;
+    // });
+
+    // response.stream.listen((value) {
+    //   bytes.addAll(value)
+    //   onDone:
+    //   () {
+    //     File newFile = new File("$basePath/image-$dateTime.$extension");
+    //     newFile.writeAsBytes(bytes);
+    //     return newFile;
+    //   };
+    // });
+  }
+
+  File _setBytes(File file, List<int> bytes) {
+    file.writeAsBytes(bytes);
+    return file;
   }
 }

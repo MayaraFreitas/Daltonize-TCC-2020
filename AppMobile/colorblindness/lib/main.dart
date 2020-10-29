@@ -100,7 +100,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   Widget _decideImageView() {
     if (_image == null) {
-      return Text("No Image Selected!");
+      return Text("Nenhuma imagem selecionada!");
     } else {
       return Image.file(
         _image,
@@ -209,7 +209,7 @@ class _LandingScreenState extends State<LandingScreen> {
   _appBar() {
     return AppBar(
       backgroundColor: Colors.grey[800],
-      title: Text("Nome do APP"),
+      title: Text("Eu Daltônico(a)"),
       actions: _decideDownloadButtonView(),
     );
   }

@@ -36,19 +36,15 @@ class DaltonizeService {
     //       });
 
     var watch = response.stream.listen((value) async {
-      print('------------>  AAAAAAAAAAAAAAA');
       bytes.addAll(value);
     });
     watch.onDone(() {
-      print('------> onDone: ' + process.isCompleted.toString());
       if (!process.isCompleted) {
         newFile.writeAsBytes(bytes);
         process.complete('done');
       }
     });
-    print('--------> awaiting.....');
     await process.future;
-    print('------------> SAINDOO!!!');
     return newFile;
   }
 

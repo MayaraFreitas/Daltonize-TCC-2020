@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flushbar/flushbar.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
 import 'package:colorblindness/service/daltonize_service.dart';
@@ -9,6 +10,7 @@ import 'package:progress_dialog/progress_dialog.dart';
 
 void main() {
   runApp(new MaterialApp(
+    debugShowCheckedModeBanner: false,
     title: "Camera App",
     home: LandingScreen(),
   ));
@@ -40,10 +42,12 @@ class _LandingScreenState extends State<LandingScreen> {
 
   _processImage(File picture, BuildContext context) async {
     Navigator.of(context).pop(); // Fecha a caixa de dialogo
-    await _uploadImage(picture);
+    if (picture != null) {
+      await _uploadImage(picture, context);
+    }
   }
 
-  _uploadImage(File picture) async {
+  _uploadImage(File picture, context) async {
     progressDialog.show();
     File file =
         await DaltonizeService.uploadImage(picture, processImage, selectedItem);
@@ -65,7 +69,7 @@ class _LandingScreenState extends State<LandingScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Ecolha:"),
+            title: Text("Escolha:"),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -119,6 +123,7 @@ class _LandingScreenState extends State<LandingScreen> {
         icon: Icon(Icons.file_download),
         onPressed: () {
           _saveImage();
+          showFlushbar(context);
         },
       ));
       return list;
@@ -212,6 +217,19 @@ class _LandingScreenState extends State<LandingScreen> {
       title: Text("Eu Daltônico(a)"),
       actions: _decideDownloadButtonView(),
     );
+  }
+
+  showFlushbar(context) {
+    Flushbar(
+      message: "Imagem Baixada",
+      icon: Icon(
+        Icons.info_outline,
+        size: 28.0,
+        color: Colors.white,
+      ),
+      duration: Duration(seconds: 3),
+      leftBarIndicatorColor: Colors.white,
+    ).show(context);
   }
 
   @override
